@@ -50,7 +50,7 @@ jobs:
 
       - name: Setup Codacy Clang-Tidy
         run: |
-          curl -sSL https://github.com/codacy/codacy-clang-tidy/releases/download/${{ env.CODACY_CLANG_TIDY_VERSION }}/codacy-clang-tidy-${{ env.CODACY_CLANG_TIDY_VERSION }}.tar.gz | tar xz
+          curl -sSL https://github.com/codacy/codacy-clang-tidy/releases/download/1.38/codacy-clang-tidy-1.38.tar.gz | tar xz
 
       - name: Run Codacy Clang-Tidy Analysis
         env:
