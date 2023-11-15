@@ -37,7 +37,7 @@ jobs:
             --volume "$CODACY_CODE":"$CODACY_CODE" \
             --volume /tmp:/tmp \
             codacy/codacy-analysis-cli \
-              analyze --tool pylint --upload --project-token ${{ secrets.CODACY_PROJECT_TOKEN }} --max-allowed-issues 99999 --commit-uuid $GITHUB_SHA
+              analyze --tool clang-tidy --upload --project-token ${{ secrets.CODACY_PROJECT_TOKEN }} --max-allowed-issues 99999 --commit-uuid $GITHUB_SHA
 
       - name: Run tests and collect coverage
         run: |
@@ -52,6 +52,7 @@ jobs:
         run: |
           # Install lcov to convert gcov data to an XML format (like Cobertura)
           sudo apt-get install lcov
+          pip install lcov-to-cobertura-xml
           # Capture coverage data and convert to XML
           lcov --capture --directory . --output-file coverage.info
           lcov --list coverage.info # Optional, for human-readable summary
