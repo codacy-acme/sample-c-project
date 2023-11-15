@@ -27,7 +27,7 @@ jobs:
           sudo apt-get -y -qq install openjdk-8-jdk openjdk-8-jre
           pip3 install coverage
           pip3 install pytest
-      
+
       - name: Run Codacy Analysis CLI with Docker
         run: |
           export CODACY_CODE=$GITHUB_WORKSPACE
