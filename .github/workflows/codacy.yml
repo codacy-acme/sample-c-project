@@ -60,5 +60,5 @@ jobs:
           CODACY_CLANG_TIDY_VERSION: "1.3.8"
         run: |
           export CODACY_CLANG_TIDY_PATH="./codacy-clang-tidy-${CODACY_CLANG_TIDY_VERSION}"
-          clang-tidy <clang-tidy-configs> | \
+          clang-tidy -checks=* | \
           $CODACY_CLANG_TIDY_PATH/scripts/send-results.sh
