@@ -50,14 +50,14 @@ jobs:
 
       - name: Setup Codacy Clang-Tidy
         run: |
-          curl -sSL https://github.com/codacy/codacy-clang-tidy/releases/download/1.38/codacy-clang-tidy-1.38.tar.gz | tar xz
+          curl -sSL https://github.com/codacy/codacy-clang-tidy/archive/refs/tags/1.3.8.tar.gz | tar xz
 
       - name: Run Codacy Clang-Tidy Analysis
         env:
           PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
           COMMIT: ${{ github.sha }}
           CODACY_URL: ${{ secrets.CODACY_URL }} # Optional: Define if you're using a self-hosted version of Codacy
-          CODACY_CLANG_TIDY_VERSION: "0.2.3"
+          CODACY_CLANG_TIDY_VERSION: "1.3.8"
         run: |
           export CODACY_CLANG_TIDY_PATH="./codacy-clang-tidy-${CODACY_CLANG_TIDY_VERSION}"
           clang-tidy <clang-tidy-configs> | \
