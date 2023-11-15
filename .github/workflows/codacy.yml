@@ -42,11 +42,11 @@ jobs:
       - name: Run tests and collect coverage
         run: |
           # Compile your C files with coverage information
-          gcc -o my_program my_program.c -fprofile-arcs -ftest-coverage
+          gcc -o my_program *.c -fprofile-arcs -ftest-coverage
           # Run your tests
           ./my_program
           # Use gcov to generate the coverage report
-          gcov my_program.c
+          gcov *.c
 
       - name: Generate coverage XML report
         run: |
