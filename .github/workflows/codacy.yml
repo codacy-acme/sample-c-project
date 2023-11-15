@@ -35,8 +35,9 @@ jobs:
 
       - name: Generate coverage XML report
         run: |
-          sudo apt-get install lcov
-          pip install lcov-to-cobertura-xml
+          sudo apt-get update -y
+          sudo apt-get install lcov -y
+          pip3 install lcov_cobertura
           lcov --capture --directory . --output-file coverage.info
           lcov --list coverage.info # Optional, for human-readable summary
           lcov_cobertura coverage.info --output $GITHUB_WORKSPACE/coverage.xml
