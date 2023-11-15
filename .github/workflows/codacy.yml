@@ -27,25 +27,18 @@ jobs:
           pip3 install coverage
           pip3 install pytest
 
-
       - name: Run tests and collect coverage
         run: |
-          # Compile your C files with coverage information
           gcc -o my_program *.c -fprofile-arcs -ftest-coverage
-          # Run your tests
           ./my_program
-          # Use gcov to generate the coverage report
           gcov *.c
 
       - name: Generate coverage XML report
         run: |
-          # Install lcov to convert gcov data to an XML format (like Cobertura)
           sudo apt-get install lcov
           pip install lcov-to-cobertura-xml
-          # Capture coverage data and convert to XML
           lcov --capture --directory . --output-file coverage.info
           lcov --list coverage.info # Optional, for human-readable summary
-          # Generate an XML report for services like Codecov or Coveralls
           lcov_cobertura coverage.info --output $GITHUB_WORKSPACE/coverage.xml
 
       - name: Upload coverage report to Codacy
@@ -53,3 +46,18 @@ jobs:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
         run: |
           bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r $GITHUB_WORKSPACE/coverage.xml
+
+      - name: Setup Codacy Clang-Tidy
+        run: |
+          curl -sSL https://github.com/codacy/codacy-clang-tidy/releases/download/${{ env.CODACY_CLANG_TIDY_VERSION }}/codacy-clang-tidy-${{ env.CODACY_CLANG_TIDY_VERSION }}.tar.gz | tar xz
+
+      - name: Run Codacy Clang-Tidy Analysis
+        env:
+          PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          COMMIT: ${{ github.sha }}
+          CODACY_URL: ${{ secrets.CODACY_URL }} # Optional: Define if you're using a self-hosted version of Codacy
+          CODACY_CLANG_TIDY_VERSION: "0.2.3"
+        run: |
+          export CODACY_CLANG_TIDY_PATH="./codacy-clang-tidy-${CODACY_CLANG_TIDY_VERSION}"
+          clang-tidy <clang-tidy-configs> | \
+          $CODACY_CLANG_TIDY_PATH/scripts/send-results.sh
