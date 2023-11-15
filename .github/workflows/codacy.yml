@@ -1,0 +1,68 @@
+
+name: Client Side Tools and Coverage
+
+on:
+  push:
+    branches: [ '*' ]
+  pull_request:
+    branches: [ '*' ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Process clang-tidy warnings
+        uses: asarium/clang-tidy-action@v1
+        with:
+          fixesFile: clang-fixes.yaml
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -y -qq install openjdk-8-jdk openjdk-8-jre
+          pip3 install coverage
+          pip3 install pytest
+      
+      - name: Run Codacy Analysis CLI with Docker
+        run: |
+          export CODACY_CODE=$GITHUB_WORKSPACE
+          docker run \
+            --rm=true \
+            --env CODACY_CODE="$CODACY_CODE" \
+            --volume /var/run/docker.sock:/var/run/docker.sock \
+            --volume "$CODACY_CODE":"$CODACY_CODE" \
+            --volume /tmp:/tmp \
+            codacy/codacy-analysis-cli \
+              analyze --tool pylint --upload --project-token ${{ secrets.CODACY_PROJECT_TOKEN }} --max-allowed-issues 99999 --commit-uuid $GITHUB_SHA
+
+
+        - name: Run tests and collect coverage
+          run: |
+            # Compile your C files with coverage information
+            gcc -o my_program my_program.c -fprofile-arcs -ftest-coverage
+            # Run your tests
+            ./my_program
+            # Use gcov to generate the coverage report
+            gcov my_program.c
+
+        - name: Generate coverage XML report
+          run: |
+            # Install lcov to convert gcov data to an XML format (like Cobertura)
+            sudo apt-get install lcov
+            # Capture coverage data and convert to XML
+            lcov --capture --directory . --output-file coverage.info
+            lcov --list coverage.info # Optional, for human-readable summary
+            # Generate an XML report for services like Codecov or Coveralls
+            lcov_cobertura coverage.info --output $GITHUB_WORKSPACE/coverage.xml
+
+
+      - name: Upload coverage report to Codacy
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        run: |
+          bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r $GITHUB_WORKSPACE/coverage.xml
