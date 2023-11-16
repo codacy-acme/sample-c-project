@@ -60,6 +60,7 @@ jobs:
         shell: bash
         run: |
           set -eux
+          mkdir tmp
           cd /tmp
           curl -fsSL https://api.github.com/repos/codacy/codacy-clang-tidy/releases/latest \
                 | grep "browser_download_url" | grep -v "browser_download_url.*jar" \
@@ -70,11 +71,11 @@ jobs:
             /tmp/codacy-clang-tidy < output > /tmp/codacy-out.json
             curl -XPOST -L -H "project-token: $PROJECT_TOKEN" \
                 -H "Content-type: application/json" --data-binary @/tmp/codacy-out.json \
-                "https://api.codacy.com/2.0/gh/DMarinhoCodacy/projC/commit/$GITHUB_SHA/issuesRemoteResults"
+                "https://api.codacy.com/2.0/commit/$COMMIT/issuesRemoteResults"
             cat /tmp/codacy-out.json
             curl -XPOST -L -H "project-token: $PROJECT_TOKEN" \
               -H "Content-type: application/json" \
-              "https://api.codacy.com/2.0/gh/DMarinhoCodacy/projC/commit/$GITHUB_SHA/resultsFinal"
+              "https://api.codacy.com/2.0/commit/$COMMIT/resultsFinal"
 
       - name: Run Codacy Clang-Tidy Analysis
         env:
