@@ -56,6 +56,26 @@ jobs:
         run: |
           bear -- gcc -o my_program *.c -fprofile-arcs -ftest-coverage
 
+      - name: "Parse and Push Clang Tidy results"
+        shell: bash
+        run: |
+          set -eux
+          cd /tmp
+          curl -fsSL https://api.github.com/repos/codacy/codacy-clang-tidy/releases/latest \
+                | grep "browser_download_url" | grep -v "browser_download_url.*jar" \
+                | cut -d '"' -f 4 \
+                | xargs -L 1 curl -fsSL -o /tmp/codacy-clang-tidy
+            chmod +x /tmp/codacy-clang-tidy
+            cd -
+            /tmp/codacy-clang-tidy < output > /tmp/codacy-out.json
+            curl -XPOST -L -H "project-token: $PROJECT_TOKEN" \
+                -H "Content-type: application/json" --data-binary @/tmp/codacy-out.json \
+                "https://api.codacy.com/2.0/gh/DMarinhoCodacy/projC/commit/$GITHUB_SHA/issuesRemoteResults"
+            cat /tmp/codacy-out.json
+            curl -XPOST -L -H "project-token: $PROJECT_TOKEN" \
+              -H "Content-type: application/json" \
+              "https://api.codacy.com/2.0/gh/DMarinhoCodacy/projC/commit/$GITHUB_SHA/resultsFinal"
+
       - name: Run Codacy Clang-Tidy Analysis
         env:
           PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
@@ -66,10 +86,11 @@ jobs:
           cd $CODACY_CLANG_TIDY_PATH/scripts/
           chmod +x send-results.sh
           clang-tidy -checks=* -p=. *.c | \
-          ./codacy-clang-tidy-1.3.8 | \
+          codacy-clang-tidy-1.3.8 | \
           curl -XPOST -L -H "project-token: $PROJECT_TOKEN" \
           -H "Content-type: application/json" -d @- \
           "https://api.codacy.com/2.0/commit/$COMMIT/issuesRemoteResults"
           curl -XPOST -L -H "project-token: $PROJECT_TOKEN" \
           -H "Content-type: application/json" \
           "https://api.codacy.com/2.0/commit/$COMMIT/resultsFinal"
+
