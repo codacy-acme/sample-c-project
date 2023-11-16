@@ -40,7 +40,7 @@ jobs:
           pip3 install lcov_cobertura
           lcov --capture --directory . --output-file coverage.info
           lcov --list coverage.info # Optional, for human-readable summary
-          lcov_cobertura coverage.info --output $GITHUB_WORKSPACE/coverage.xml
+          lcov_cobertura coverage.info --output $GITHUB_WORKSPACE/coverage.xmlccod
 
       - name: Upload coverage report to Codacy
         env:
