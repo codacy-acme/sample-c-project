@@ -67,4 +67,10 @@ jobs:
           chmod +x send-results.sh
           cat send-results.sh
           clang-tidy -checks=* -p=. *.c | \
-          ./send-results.sh
+          ./codacy-clang-tidy-1.3.8 | \
+          curl -XPOST -L -H "project-token: $PROJECT_TOKEN" \
+          -H "Content-type: application/json" -d @- \
+          "https://api.codacy.com/2.0/commit/$COMMIT/issuesRemoteResults"
+          curl -XPOST -L -H "project-token: $PROJECT_TOKEN" \
+          -H "Content-type: application/json" \
+          "https://api.codacy.com/2.0/commit/$COMMIT/resultsFinal"
